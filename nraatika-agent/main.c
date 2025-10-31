@@ -85,26 +85,44 @@ inline command_t	move_in_random_unblocked_direction(agent_info_t info)
 	};
 }
 
-// -----------------------------------------------------------------------------
-
-/*
-int hive_is_visible(agent_info_t info, int *x, int *y)
+static command_t targeted_explore(agent_info_t info)
 {
-	int seen = 0;
-	for (int i=0; i < VIEW_SIZE; ++i)
+	static int	switch_after = 100;
+	coords_t targets[NUM_BEES][2] = {
+		{{3, 3}, {3, 10}},
+		{{3, 16}, {3, 22}},
+		{{9, 16}, {16, 16}},
+		{{22, 16}, {22, 22}},
+		{{22, 3}, {22, 10}}
+	};
+	
+	return (try_going(info, go_to_coords(info, targets[info.bee][(info.turn / switch_after) % 2])));
+}
+
+static dir_t go_to_coords(agent_info_t info, coords_t target)
+{
+	int	dx = target.col - info.col;
+	int dy = target.row - info.row;
+
+	if (dx == 0 || dy == 0)
 	{
-		for (int j=0; j < VIEW_SIZE; ++j)
-		{
-			if (info.cells[i][j] == (HIVE_0 + info.player))
-			{
-				*y = i;
-				*x = j;
-				return 1;
-			}
-		}
+		if (dx == 0)
+			return (dy < 0 ? N : S);
+		else
+			return (dx < 0 ? W : E);
 	}
-	return 0;
-}*/
+	if (abs(dx) * 2 < abs(dy))
+		return (dy < 0 ? N : S);
+	else if (abs(dy) * 2 < abs(dx))
+		return (dx < 0 ? W : E);
+	else
+	{
+		if (dx < 0)
+			return (dy < 0 ? NW : SW);
+		else
+			return (dy < 0 ? NE : SE);
+	}
+}	
 
 //go toward home
 static dir_t go_home(agent_info_t info)
@@ -216,9 +234,9 @@ command_t think(agent_info_t info)
 	// Try to find a flower in the view distance
 	flower_dir = closest_flower_direction(info);
 
-	// No flower in view distance -> random move
+	// No flower in view distance -> explore in predefined direction
 	if (flower_dir < 0)
-		return move_in_random_unblocked_direction(info);
+		return targeted_explore(info);
 
 	// If flower in view distance -> try to move in its direction
 	int	count = 0;
