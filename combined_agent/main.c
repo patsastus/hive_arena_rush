@@ -28,7 +28,6 @@ int find_neighbour(agent_info_t info, cell_t type)
 command_t think(agent_info_t info)
 {
 	update_hivemind(info);
-	print_hivemind();
 
     cell_t bee = info.cells[VIEW_DISTANCE][VIEW_DISTANCE];
 
