@@ -57,28 +57,50 @@ command_t think(agent_info_t info)
 	}
 
 	// If next to an enemy bee with a flower -> punch enemy
+	int	enemy_type	= (info.player == 0 ? BEE_1_WITH_FLOWER : BEE_0_WITH_FLOWER);
+	int	enemy_dir	= find_neighbour(info, enemy_type);
+	if (enemy_dir >= 0) {
+		return (command_t) {
+			.action = GUARD,
+			.direction = enemy_dir
+		};
+	}
 
 	// If next to enemy hive -> build wall?
 
 	// Try to find a flower in the view distance
 	flower_dir = closest_flower_direction(info);
-
-	// No flower in view distance -> random move
-	if (flower_dir < 0)
-		return targeted_explore(info);
-
-	// If flower in view distance -> try to move in its direction
-	int	count = 0;
-	while (blocked(info, flower_dir) && count++ < 8)
-		flower_dir = (flower_dir + 1) % 8;
 	if (flower_dir >= 0) {
-		return (command_t) {
-			.action = MOVE,
-			.direction = flower_dir
-		};
+		int	count = 0;
+		while (blocked(info, flower_dir) && count++ < 8)
+			flower_dir = (flower_dir + 1) % 8;
+		if (flower_dir >= 0) {
+			return (command_t) {
+				.action = MOVE,
+				.direction = flower_dir
+			};
+		}
 	}
 
-	return move_in_random_unblocked_direction(info);
+	// Try to look for a flower in the hivemind
+	coords_t	closest_flower = closest_flower_in_hivemind(info);
+	if (closest_flower.row >= NUM_ROWS || closest_flower.col >= NUM_COLS)
+	{
+		// printf("No closest hivemind flower\n");
+		// fflush(stdout);
+		return targeted_explore(info);
+	}
+	// printf("The hivemind knows about a flower at row: %d col: %d\n", closest_flower.row, closest_flower.col);
+	// fflush(stdout);
+	coords_t	closest_bee = closest_bee_to_target(info, closest_flower);
+	if (closest_bee.row != info.row || closest_bee.col != info.col)
+		return targeted_explore(info);
+	// printf("Bee at row: %d col: %d pursuing\n", closest_bee.row, closest_bee.col);
+	// fflush(stdout);
+	return (command_t) {
+		.action = MOVE,
+		.direction = direction_towards(closest_bee, closest_flower)
+	};
 }
 
 int main(int argc, char **argv)
@@ -90,12 +112,13 @@ int main(int argc, char **argv)
 
     char *host = argv[1];
     int port = atoi(argv[2]);
-    char *team_name = "agent1040";
+    char *team_name = "agent1346";
 	
 	for (int i = 0; i < NUM_ROWS; ++i) {
 		for (int j = 0; j < NUM_COLS; ++j)
 			g_hivemind.map[i][j] = UNKNOWN;
 	}
 
+	initialize_hivemind();
     agent_main(host, port, team_name, think);
 }
