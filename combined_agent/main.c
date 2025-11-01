@@ -4,91 +4,11 @@
 #include <stdio.h>
 #include "agent.h"
 #include "jvarila.h"
+#include "move.h"
 
 // -----------------------------------------------------------------------------
 extern t_hivemind	g_hivemind;
 // -----------------------------------------------------------------------------
-
-/*
-int hive_is_visible(agent_info_t info, int *x, int *y)
-{
-	int seen = 0;
-	for (int i=0; i < VIEW_SIZE; ++i)
-	{
-		for (int j=0; j < VIEW_SIZE; ++j)
-		{
-			if (info.cells[i][j] == (HIVE_0 + info.player))
-			{
-				*y = i;
-				*x = j;
-				return 1;
-			}
-		}
-	}
-	return 0;
-}*/
-
-//go toward home
-static dir_t go_home(agent_info_t info)
-{
-	dir_t goal = W - 4*info.player;
-	int home[2] = {12, 1};
-	if (info.player)
-	{
-		home[1] = 28;
-		if (info.row - home[0] > 0)
-			goal = NE;
-		else if (info.row - home[0] < 0)
-			goal = SE;
-		if (info.col >= 27)
-			goal = N + (info.row - home[0] < 0)*4;
-	}
-	else
-	{
-		if (info.row - home[0] > 0)
-			goal = NW;
-		else if (info.row - home[0] < 0)
-			goal = SW;
-		if (info.col <= 2)
-			goal = N + (info.row - home[0] < 0)*4;
-	}
-	return goal;
-}
-
-static cell_t	get_cell_type(agent_info_t info, dir_t d)
-{
-	int	x = 0;
-	int y = 0;
-
-	if (d == N || d == NW || d == NE)
-		y = -1;
-	if (d == S || d == SW || d == SE)
-		y = 1;
-	if (d == E || d == NE || d == SE)
-		x = 1;
-	if (d == W || d == NW || d == SW)
-		x = -1;
-	return (info.cells[VIEW_DISTANCE+y][VIEW_DISTANCE+x]);
-}
-
-static command_t try_going(agent_info_t info, dir_t direction)
-{
-	// printf("Bee at [%d,%d] going towards %d\n", info.row, info.col, direction);
-	if (get_cell_type(info, direction) == EMPTY)
-	{
-		return (command_t) {
-                .action = MOVE,
-                .direction = direction
-            };
-	}
-	else 
-	{
-		return (command_t) {
-        	.action = MOVE,
-	        .direction = rand() % 8
-    	};
-	}
-}
 
 int find_neighbour(agent_info_t info, cell_t type)
 {
@@ -147,7 +67,7 @@ command_t think(agent_info_t info)
 
 	// No flower in view distance -> random move
 	if (flower_dir < 0)
-		return move_in_random_unblocked_direction(info);
+		return targeted_explore(info);
 
 	// If flower in view distance -> try to move in its direction
 	int	count = 0;
@@ -172,7 +92,7 @@ int main(int argc, char **argv)
 
     char *host = argv[1];
     int port = atoi(argv[2]);
-    char *team_name = "nraatika_agent";
+    char *team_name = "agent1040";
 	
 	for (int i = 0; i < NUM_ROWS; ++i) {
 		for (int j = 0; j < NUM_COLS; ++j)

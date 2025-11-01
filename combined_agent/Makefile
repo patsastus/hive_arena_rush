@@ -3,7 +3,7 @@ CFLAGS=-Wall -Wextra -O3 -flto
 CPPFLAGS=-I../src
 LDFLAGS=-flto -L../bin -lagent
 
-OBJS=main.o jvarila.o
+OBJS=main.o jvarila.o move.o
 NAME=agent
 
 all: $(NAME)
