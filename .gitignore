@@ -1,1 +1,4 @@
 *.o
+*/agent
+*log.gz
+

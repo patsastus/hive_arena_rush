@@ -2,7 +2,6 @@
 #include <unistd.h>
 #include <stdlib.h>
 
-t_hivemind	g_hivemind;
 
 void	update_hivemind(agent_info_t info)
 {

@@ -7,7 +7,10 @@
 typedef struct s_hivemind
 {
 	cell_t		map[NUM_ROWS][NUM_COLS];
+	int			bee_targets_reached[NUM_BEES];
 }			t_hivemind;
+
+extern t_hivemind g_hivemind;
 
 void		update_hivemind(agent_info_t info);
 void		print_hivemind();

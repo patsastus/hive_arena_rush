@@ -1,17 +1,47 @@
 #include "move.h"
+#include <stdio.h>
+
+void	update_bee_target(agent_info_t info)
+{
+	g_hivemind.bee_targets_reached[info.bee] += 1;
+}
 
 command_t	targeted_explore(agent_info_t info)
 {
-	static int	switch_after = 100;
-	coords_t targets[NUM_BEES][2] = {
-		{{3, 3}, {3, 10}},
-		{{3, 16}, {3, 22}},
-		{{9, 16}, {16, 16}},
-		{{22, 16}, {22, 22}},
-		{{22, 3}, {22, 10}}
+//	int			switch_after = 400;
+	int			num_locations = 3;
+	int			target;
+	coords_t	targets[2][NUM_BEES][3] = {
+		{
+			{{3, 3}, {3, 10}, {3, 27}},
+			{{3, 16}, {3, 22}, {7, 25}},
+			{{9, 16}, {16, 16}, {12, 25}},
+			{{22, 16}, {22, 22}, {17, 25}},
+			{{22, 3}, {22, 10}, {22, 27}}
+		},
+		{
+			{{3, 27}, {3, 20}, {3, 3}},
+			{{3, 14}, {3, 8}, {7, 5}},
+			{{9, 14}, {16, 14}, {12, 5}},
+			{{22, 14}, {22, 8}, {17, 5}},
+			{{22, 27}, {22, 20}, {22, 3}}
+		}
 	};
 	
-	return (try_going(info, go_to_coords(info, targets[info.bee][(info.turn / switch_after) % 2])));
+//	return (try_going(info, go_to_coords(info, targets[info.player][info.bee][(info.turn / switch_after) % num_locations])));
+	target = g_hivemind.bee_targets_reached[info.bee];
+	if (target < num_locations && targets[info.player][info.bee][target].row == info.row &&  
+		targets[info.player][info.bee][target].col == info.col)
+	{
+		printf("Bee %d reached a target\n", info.bee);
+		update_bee_target(info);
+	}
+	if (target == num_locations)
+	{
+		printf("Bee %d reached final destination\n", info.bee);
+		return(move_in_random_unblocked_direction(info));
+	}
+	return (try_going(info, go_to_coords(info, targets[info.player][info.bee][target])));
 }
 
 dir_t	go_to_coords(agent_info_t info, coords_t target)

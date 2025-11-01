@@ -2,6 +2,7 @@
 # define MOVE_H
 #include "agent.h"
 #include <stdlib.h>
+#include "jvarila.h"
 
 command_t	targeted_explore(agent_info_t info);
 dir_t 		go_to_coords(agent_info_t info, coords_t target);

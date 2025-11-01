@@ -6,9 +6,7 @@
 #include "jvarila.h"
 #include "move.h"
 
-// -----------------------------------------------------------------------------
-extern t_hivemind	g_hivemind;
-// -----------------------------------------------------------------------------
+t_hivemind	g_hivemind;
 
 int find_neighbour(agent_info_t info, cell_t type)
 {
