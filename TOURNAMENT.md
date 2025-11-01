@@ -8,10 +8,15 @@ Here are some stats from sets of 1000 fights between the different agents, each 
 | **aggressive** | 100.00 : 0.00 : 0.00 | 44.20:14.10:41.70  | 99.00 : 0.50 : 0.50 | **                    |
 
 We also tested **aggressive** and **combined** against some agents we found in public repos from the 2022 challenge, again the results presented in table form (to run test, we needed to copy the libagent.a into the cloned repo, and some projects still wouldn't compile):
+
 **DeepBlueC:** https://github.com/SeanTroy/HiveArena
+
 **tribe13-agent7:** https://github.com/kona3b/42_Hive_Arena
+
 **team-aleph:** https://github.com/teemu-hakala/hive-arena-team-aleph.git (takes ~15 minutes to simulate 1000 matches against this staller)
+
 **Framboisier:** https://github.com/B9R9/42-Hive-Arena
+
 
 | **                 | combined              | aggressive            |
 | ------------------ | --------------------- | --------------------- |
