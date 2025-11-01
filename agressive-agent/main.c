@@ -28,7 +28,7 @@ int find_neighbour(agent_info_t info, cell_t type)
 command_t think(agent_info_t info)
 {
 	update_hivemind(info);
-	print_hivemind();
+//	print_hivemind();
 
     cell_t bee = info.cells[VIEW_DISTANCE][VIEW_DISTANCE];
 
@@ -112,7 +112,7 @@ int main(int argc, char **argv)
 
     char *host = argv[1];
     int port = atoi(argv[2]);
-    char *team_name = "agent1346";
+    char *team_name = "agent_final_agression";
 	
 	for (int i = 0; i < NUM_ROWS; ++i) {
 		for (int j = 0; j < NUM_COLS; ++j)
