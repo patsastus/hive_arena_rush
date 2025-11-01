@@ -112,7 +112,7 @@ int main(int argc, char **argv)
 
     char *host = argv[1];
     int port = atoi(argv[2]);
-    char *team_name = "agent1346";
+    char *team_name = "combined-agent";
 	
 	for (int i = 0; i < NUM_ROWS; ++i) {
 		for (int j = 0; j < NUM_COLS; ++j)

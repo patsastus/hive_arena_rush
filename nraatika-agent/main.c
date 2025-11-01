@@ -161,7 +161,7 @@ int main(int argc, char **argv)
 
     char *host = argv[1];
     int port = atoi(argv[2]);
-    char *team_name = "nraatika_agent";
+    char *team_name = "nraatika-agent";
 
     agent_main(host, port, team_name, think);
 }
