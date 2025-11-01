@@ -9,6 +9,7 @@ typedef struct s_hivemind
 	cell_t		map[NUM_ROWS][NUM_COLS];
 	int			bee_targets_reached[NUM_BEES];
 	int			last_observed[NUM_ROWS][NUM_COLS];
+	bool		initial_explore[NUM_BEES];
 }			t_hivemind;
 
 extern t_hivemind g_hivemind;
