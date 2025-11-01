@@ -57,6 +57,13 @@ command_t think(agent_info_t info)
 	}
 
 	// If next to an enemy bee with a flower -> punch enemy
+	int	enemy_type	= (info.player == 0 ? BEE_1_WITH_FLOWER : BEE_0_WITH_FLOWER);
+	int	enemy_dir	= find_neighbour(info, enemy_type);
+	if (enemy_dir >= 0)
+		return (command_t) {
+			.action = GUARD,
+			.direction = enemy_dir
+		};
 
 	// If next to enemy hive -> build wall?
 
@@ -97,5 +104,6 @@ int main(int argc, char **argv)
 			g_hivemind.map[i][j] = UNKNOWN;
 	}
 
+	initialize_hivemind();
     agent_main(host, port, team_name, think);
 }

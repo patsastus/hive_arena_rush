@@ -3,6 +3,16 @@
 #include <stdlib.h>
 
 
+void	initialize_hivemind(void)
+{
+	for (int i = 0; i < NUM_ROWS; ++i) {
+		for (int j = 0; j < NUM_COLS; ++j) {
+			g_hivemind.map[i][j] = UNKNOWN;
+			g_hivemind.last_observed[i][j] = 0;
+		}
+	}
+}
+
 void	update_hivemind(agent_info_t info)
 {
 	int	top		= info.row - VIEW_DISTANCE - 1;
@@ -10,16 +20,6 @@ void	update_hivemind(agent_info_t info)
 	int	left	= info.col - VIEW_DISTANCE - 1;
 	int	right	= info.col + VIEW_DISTANCE + 1;
 
-	for (int i = 0; i < 2 * VIEW_DISTANCE + 3; ++i) {
-		if (top > 0 && left + i > 0 && left + i < NUM_COLS)
-			g_hivemind.map[top][left + i] = UNKNOWN;
-		if (bottom < NUM_ROWS && left + i > 0 && left + i < NUM_COLS)
-			g_hivemind.map[bottom][left + i] = UNKNOWN;
-		if (left > 0 && top + i > 0 && top + i < NUM_ROWS)
-			g_hivemind.map[top + i][left] = UNKNOWN;
-		if (right < NUM_COLS && top + i > 0 && top + i < NUM_ROWS)
-			g_hivemind.map[top + i][right] = UNKNOWN;
-	}
 	// printf("Updating hivemind for player %d bee %d\n", info.player, info.bee);
 	// printf("%d %d\n", info.player, info.bee);
 	for (int r = 0; r < 2 * VIEW_DISTANCE + 1; ++r) {
@@ -31,11 +31,18 @@ void	update_hivemind(agent_info_t info)
 				continue;
 			// printf("r: %d\tc: %d\tgr: %d\tgc: %d\n", r, c, global_row, global_col);
 			g_hivemind.map[global_row][global_col] = info.cells[r][c];
+			g_hivemind.last_observed[global_row][global_col] = info.turn;
+		}
+	}
+	for (int r = 0; r < NUM_ROWS; ++r) {
+		for (int c = 0; c < NUM_COLS; ++c) {
+			if (info.turn - g_hivemind.last_observed[r][c] > 30)
+				g_hivemind.map[r][c] = UNKNOWN;
 		}
 	}
 }
 
-void	print_hivemind()
+void	print_hivemind(void)
 {
 	for (int r = 0; r < NUM_ROWS; ++r) {
 		for (int c = 0; c < NUM_COLS; ++c) {
@@ -45,16 +52,22 @@ void	print_hivemind()
 					write(STDOUT_FILENO, " . ", 3);
 					break;
 				case BEE_0:
+					write(STDOUT_FILENO, " B0", 3);
+					break;
 				case BEE_1:
-					write(STDOUT_FILENO, " B ", 3);
+					write(STDOUT_FILENO, " B1", 3);
 					break;
 				case BEE_0_WITH_FLOWER:
+					write(STDOUT_FILENO, " f0", 3);
+					break;
 				case BEE_1_WITH_FLOWER:
-					write(STDOUT_FILENO, " f ", 3);
+					write(STDOUT_FILENO, " f1", 3);
 					break;
 				case HIVE_0:
+					write(STDOUT_FILENO, " H0", 3);
+					break;
 				case HIVE_1:
-					write(STDOUT_FILENO, " H ", 3);
+					write(STDOUT_FILENO, " H1", 3);
 					break;
 				case FLOWER:
 					write(STDOUT_FILENO, " F ", 3);
@@ -79,7 +92,27 @@ inline bool blocked(agent_info_t info, int dir)
 	coords_t	bee		= {VIEW_DISTANCE, VIEW_DISTANCE};
 	coords_t	target	= direction_to_coords(bee, dir);
 
-	return (info.cells[target.row][target.col] != EMPTY ? true : false);
+	return (info.cells[target.row][target.col] != EMPTY);
+}
+
+int	direction_towards(coords_t from, coords_t to)
+{
+	if (to.col == from.col && to.row < from.row)
+		return N;
+	if (to.col > from.col && to.row < from.row)
+		return NE;
+	if (to.col > from.col && to.row == from.row)
+		return E;
+	if (to.col > from.col && to.row > from.row)
+		return SE;
+	if (to.col == from.col && to.row > from.row)
+		return S;
+	if (to.col < from.col && to.row > from.row)
+		return SW;
+	if (to.col < from.col && to.row == from.row)
+		return W;
+	else
+		return NW;
 }
 
 int closest_flower_direction(agent_info_t info)
@@ -108,22 +141,39 @@ int closest_flower_direction(agent_info_t info)
 	}
 	if (distance_squared(bee, closest_flower) > 2 * VIEW_DISTANCE * VIEW_DISTANCE)
 		return -1;
-	if (closest_flower.col == bee.col && closest_flower.row < bee.row)
-		return N;
-	if (closest_flower.col > bee.col && closest_flower.row < bee.row)
-		return NE;
-	if (closest_flower.col > bee.col && closest_flower.row == bee.row)
-		return E;
-	if (closest_flower.col > bee.col && closest_flower.row > bee.row)
-		return SE;
-	if (closest_flower.col == bee.col && closest_flower.row > bee.row)
-		return S;
-	if (closest_flower.col < bee.col && closest_flower.row > bee.row)
-		return SW;
-	if (closest_flower.col < bee.col && closest_flower.row == bee.row)
-		return W;
-	else
-		return NW;
+	return direction_towards(bee, closest_flower);
+}
+
+coords_t	closest_x_to_target(cell_t type, coords_t target)
+{
+	coords_t	closest = {.row = NUM_ROWS, .col = NUM_COLS};
+
+	for (int r = 0; r < NUM_ROWS; ++r) {
+		for (int c = 0; c < NUM_COLS; ++c) {
+			if (g_hivemind.map[r][c] != type)
+				continue;
+			coords_t	candidate = {.row = r, .col = c};
+			if (distance_squared(candidate, target) < distance_squared(candidate, target))
+				closest = candidate;
+		}
+	}
+	return closest;
+}
+
+coords_t	closest_flower_in_hivemind(agent_info_t info)
+{
+	coords_t	bee = {.row = info.row, .col = info.col};
+
+	return closest_x_to_target(FLOWER, bee);
+}
+
+
+coords_t	closest_bee_to_target(agent_info_t info, coords_t target)
+{
+	coords_t	closest_bee	= {.row = NUM_ROWS, .col = NUM_COLS};
+	cell_t		bee_team	= (info.player == 0 ? BEE_0 : BEE_1);
+
+	return closest_x_to_target(bee_team, target);
 }
 
 inline command_t	move_in_random_unblocked_direction(agent_info_t info)
