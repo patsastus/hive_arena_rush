@@ -13,7 +13,7 @@ We also tested **aggressive** and **combined** against some agents we found in p
 
 **tribe13-agent7:** https://github.com/kona3b/42_Hive_Arena
 
-**team-aleph:** https://github.com/teemu-hakala/hive-arena-team-aleph.git (takes ~15 minutes to simulate 1000 matches against this staller)
+**team-aleph:** https://github.com/teemu-hakala/hive-arena-team-aleph (takes ~15 minutes to simulate 1000 matches against this staller)
 
 **Framboisier:** https://github.com/B9R9/42-Hive-Arena
 
