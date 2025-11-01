@@ -33,12 +33,12 @@ command_t	targeted_explore(agent_info_t info)
 	if (target < num_locations && targets[info.player][info.bee][target].row == info.row &&  
 		targets[info.player][info.bee][target].col == info.col)
 	{
-		printf("Bee %d reached a target\n", info.bee);
+//		printf("Bee %d reached a target\n", info.bee);
 		update_bee_target(info);
 	}
 	if (target == num_locations)
 	{
-		printf("Bee %d reached final destination\n", info.bee);
+//		printf("Bee %d reached final destination\n", info.bee);
 		return(move_in_random_unblocked_direction(info));
 	}
 	return (try_going(info, go_to_coords(info, targets[info.player][info.bee][target])));
