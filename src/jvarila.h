@@ -18,8 +18,10 @@ void		update_hivemind(agent_info_t info);
 void		print_hivemind(void);
 int			distance_squared(coords_t from, coords_t to);
 bool		blocked(agent_info_t info, int dir);
+int			direction_towards(coords_t from, coords_t to);
 int			closest_flower_direction(agent_info_t info);
 coords_t	closest_flower_in_hivemind(agent_info_t info);
+coords_t	closest_bee_to_target(agent_info_t info, coords_t target);
 command_t	move_in_random_unblocked_direction(agent_info_t info);
 
 #endif

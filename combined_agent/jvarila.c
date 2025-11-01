@@ -1,6 +1,7 @@
 #include "jvarila.h"
 #include <unistd.h>
 #include <stdlib.h>
+#include <limits.h>
 
 
 void	initialize_hivemind(void)
@@ -15,13 +16,6 @@ void	initialize_hivemind(void)
 
 void	update_hivemind(agent_info_t info)
 {
-	int	top		= info.row - VIEW_DISTANCE - 1;
-	int	bottom	= info.row + VIEW_DISTANCE + 1;
-	int	left	= info.col - VIEW_DISTANCE - 1;
-	int	right	= info.col + VIEW_DISTANCE + 1;
-
-	// printf("Updating hivemind for player %d bee %d\n", info.player, info.bee);
-	// printf("%d %d\n", info.player, info.bee);
 	for (int r = 0; r < 2 * VIEW_DISTANCE + 1; ++r) {
 		for (int c = 0; c < 2 * VIEW_DISTANCE + 1; ++c) {
 			int	global_row = r + info.row - VIEW_DISTANCE;
@@ -29,14 +23,13 @@ void	update_hivemind(agent_info_t info)
 			if (global_row < 0 || global_row >= NUM_ROWS
 				|| global_col < 0 || global_col >= NUM_COLS)
 				continue;
-			// printf("r: %d\tc: %d\tgr: %d\tgc: %d\n", r, c, global_row, global_col);
 			g_hivemind.map[global_row][global_col] = info.cells[r][c];
 			g_hivemind.last_observed[global_row][global_col] = info.turn;
 		}
 	}
 	for (int r = 0; r < NUM_ROWS; ++r) {
 		for (int c = 0; c < NUM_COLS; ++c) {
-			if (info.turn - g_hivemind.last_observed[r][c] > 30)
+			if (info.turn - g_hivemind.last_observed[r][c] > 200)
 				g_hivemind.map[r][c] = UNKNOWN;
 		}
 	}
@@ -146,14 +139,14 @@ int closest_flower_direction(agent_info_t info)
 
 coords_t	closest_x_to_target(cell_t type, coords_t target)
 {
-	coords_t	closest = {.row = NUM_ROWS, .col = NUM_COLS};
+	coords_t	closest = {.row = 3 * NUM_ROWS, .col = 3 * NUM_COLS};
 
 	for (int r = 0; r < NUM_ROWS; ++r) {
 		for (int c = 0; c < NUM_COLS; ++c) {
 			if (g_hivemind.map[r][c] != type)
 				continue;
 			coords_t	candidate = {.row = r, .col = c};
-			if (distance_squared(candidate, target) < distance_squared(candidate, target))
+			if (distance_squared(candidate, target) < distance_squared(candidate, closest))
 				closest = candidate;
 		}
 	}
@@ -170,7 +163,6 @@ coords_t	closest_flower_in_hivemind(agent_info_t info)
 
 coords_t	closest_bee_to_target(agent_info_t info, coords_t target)
 {
-	coords_t	closest_bee	= {.row = NUM_ROWS, .col = NUM_COLS};
 	cell_t		bee_team	= (info.player == 0 ? BEE_0 : BEE_1);
 
 	return closest_x_to_target(bee_team, target);
