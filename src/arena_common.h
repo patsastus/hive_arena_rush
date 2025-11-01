@@ -23,7 +23,8 @@ typedef enum
     WALL,
     HIVE_0,
     HIVE_1,
-    OUTSIDE
+    OUTSIDE,
+	UNKNOWN
 } cell_t;
 
 typedef enum
